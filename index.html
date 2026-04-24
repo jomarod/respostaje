@@ -219,6 +219,7 @@
 
   .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
   .form-grid.budget-grid { grid-template-columns: 1fr 1fr auto; }
+  .form-grid.repostaje-grid { grid-template-columns: 1fr 1fr auto; }
 
   .field label {
     display: block;
@@ -456,7 +457,7 @@
     .overview .featured .stat-value { font-size: 36px; }
     .stat-label { font-size: 10px; margin-bottom: 6px; }
 
-    /* forms apilados verticalmente en móvil */
+    /* forms apilados verticalmente en móvil, excepto repostaje que queda en línea */
     .form-card { padding: 18px; margin-bottom: 20px; }
     .form-card h2 { font-size: 14px; margin-bottom: 14px; }
     .form-grid,
@@ -468,6 +469,26 @@
     .form-grid.budget-grid .btn {
       width: 100%;
       padding: 14px;
+    }
+
+    /* repostaje sigue en una línea en móvil */
+    .form-grid.repostaje-grid {
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+    }
+    .form-grid.repostaje-grid .btn {
+      width: auto;
+      padding: 10px 14px;
+      font-size: 11px;
+      align-self: end;
+    }
+    .form-grid.repostaje-grid .field input {
+      padding: 10px 10px;
+      font-size: 13px;
+    }
+    .form-grid.repostaje-grid .field label {
+      font-size: 10px;
+      letter-spacing: 0.04em;
     }
 
     .setup-fields { grid-template-columns: 1fr; }
@@ -554,21 +575,17 @@ create index on repostajes (fecha desc);</code>
     <button class="btn btn-ghost" onclick="switchTab('config')">Ir a Configuración →</button>
   </div>
 
-<!-- Nuevo repostaje -->
+  <!-- Nuevo repostaje (PRIMERO) -->
   <div class="form-card">
     <h2>Registrar repostaje</h2>
-    <div class="form-grid">
+    <div class="form-grid repostaje-grid">
       <div class="field">
         <label>Fecha</label>
         <input type="date" id="input-fecha">
       </div>
       <div class="field">
         <label>Importe (€)</label>
-        <input type="number" id="input-importe" placeholder="0.00" step="0.01" min="0.01">
-      </div>
-      <div class="field">
-        <label>Notas (opcional)</label>
-        <input type="text" id="input-notas" placeholder="Gasolinera, km…">
+        <input type="number" id="input-importe" placeholder="0.00" step="0.01" min="0.01" inputmode="decimal">
       </div>
       <button class="btn btn-primary" id="btn-guardar" onclick="guardarRepostaje()" disabled>Guardar</button>
     </div>
@@ -600,7 +617,7 @@ create index on repostajes (fecha desc);</code>
     </div>
   </div>
 
-    <!-- Presupuesto -->
+  <!-- Presupuesto (AL FINAL) -->
   <div class="form-card">
     <h2>Presupuesto del período</h2>
     <div class="form-grid budget-grid">
@@ -610,13 +627,11 @@ create index on repostajes (fecha desc);</code>
       </div>
       <div class="field">
         <label>Saldo total (€)</label>
-        <input type="number" id="budget-total" placeholder="500.00" step="0.01" min="0">
+        <input type="number" id="budget-total" placeholder="500.00" step="0.01" min="0" inputmode="decimal">
       </div>
       <button class="btn btn-primary" onclick="saveBudget()">Guardar</button>
     </div>
   </div>
-  
-  
 </div>
 
 <!-- HISTORIAL -->
@@ -813,7 +828,6 @@ create index on repostajes (fecha desc);</code>
 
     const fecha = document.getElementById('input-fecha').value;
     const importe = parseFloat(document.getElementById('input-importe').value);
-    const notas = document.getElementById('input-notas').value.trim();
 
     if (!fecha) { notify('Selecciona una fecha', 'error'); return; }
     if (!importe || importe <= 0) { notify('Introduce un importe válido', 'error'); return; }
@@ -823,11 +837,10 @@ create index on repostajes (fecha desc);</code>
     btn.textContent = 'Guardando…';
 
     try {
-      const res = await sbFetch('POST', '/rest/v1/repostajes', { fecha, importe, notas: notas || null });
+      const res = await sbFetch('POST', '/rest/v1/repostajes', { fecha, importe, notas: null });
       if (!res.ok) throw new Error(await res.text());
 
       document.getElementById('input-importe').value = '';
-      document.getElementById('input-notas').value = '';
       document.getElementById('input-fecha').value = today();
 
       await loadAll();
