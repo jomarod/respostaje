@@ -55,15 +55,14 @@
     padding: 24px 32px 0;
     border-bottom: 1px solid var(--border);
     margin-bottom: 32px;
+    justify-content: center;
   }
 
   .tab {
-    font-family: 'Syne', sans-serif;
-    font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 12px 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 32px;
     cursor: pointer;
     color: var(--muted);
     border-bottom: 2px solid transparent;
@@ -73,6 +72,14 @@
     border-top: none;
     border-left: none;
     border-right: none;
+    flex: 1;
+    max-width: 160px;
+  }
+
+  .tab svg {
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
   }
 
   .tab:hover { color: var(--text); }
@@ -291,6 +298,23 @@
   }
   .btn-danger:hover { background: var(--danger); color: #fff; }
 
+  .btn-icon {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .btn-icon svg { width: 16px; height: 16px; }
+  .btn-icon:hover { color: var(--danger); border-color: var(--danger); }
+
   /* TABLE */
   .table-wrap {
     background: var(--surface);
@@ -418,19 +442,18 @@
 
     .panel { padding: 0 16px 24px; }
 
-    /* stats apiladas en móvil: una destacada arriba, 2 pequeñas debajo */
+    /* stats apiladas en una sola columna en móvil */
     .overview {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 10px;
       margin-bottom: 20px;
     }
     .overview .featured {
-      grid-column: 1 / -1;
       padding: 18px 20px;
     }
-    .stat-card { padding: 14px 16px; }
-    .stat-value { font-size: 22px; }
-    .overview .featured .stat-value { font-size: 34px; }
+    .stat-card { padding: 14px 18px; }
+    .stat-value { font-size: 26px; }
+    .overview .featured .stat-value { font-size: 36px; }
     .stat-label { font-size: 10px; margin-bottom: 6px; }
 
     /* forms apilados verticalmente en móvil */
@@ -451,11 +474,14 @@
 
     .progress-wrap { padding: 16px 18px; margin-bottom: 20px; }
 
-    /* tablas: ocultar notas en móvil, que siempre son opcionales */
+    /* tablas: scroll horizontal si no cabe */
     .table-header { padding: 14px 16px; }
     .table-header h2 { font-size: 14px; }
-    thead th, tbody td { padding: 10px 14px; font-size: 12px; }
+    .table-wrap { overflow: hidden; }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    thead th, tbody td { padding: 10px 12px; font-size: 12px; }
     tbody td.amount-cell { white-space: nowrap; }
+    tbody td:first-child { white-space: nowrap; }
 
     /* notification full-width en móvil */
     #notification {
@@ -485,9 +511,28 @@
 </header>
 
 <nav>
-  <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
-  <button class="tab" onclick="switchTab('historial')">Historial</button>
-  <button class="tab" onclick="switchTab('config')">Configuración</button>
+  <button class="tab active" onclick="switchTab('dashboard', event)" aria-label="Dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 22V8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v14"/>
+      <path d="M3 22h12"/>
+      <path d="M6 10h6"/>
+      <path d="M6 14h6"/>
+      <path d="M15 10h3a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2V8l-3-3"/>
+    </svg>
+  </button>
+  <button class="tab" onclick="switchTab('historial', event)" aria-label="Historial">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+      <path d="M8 7h8"/>
+      <path d="M8 11h6"/>
+    </svg>
+  </button>
+  <button class="tab" onclick="switchTab('config', event)" aria-label="Configuración">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  </button>
 </nav>
 
 <!-- DASHBOARD -->
@@ -570,25 +615,6 @@ create index on repostajes (fecha desc);</code>
       <button class="btn btn-primary" id="btn-guardar" onclick="guardarRepostaje()" disabled>Guardar</button>
     </div>
   </div>
-
-  <!-- Últimos repostajes -->
-  <div class="table-wrap">
-    <div class="table-header">
-      <h2>Últimos repostajes</h2>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Importe</th>
-          <th>Notas</th>
-        </tr>
-      </thead>
-      <tbody id="recent-tbody">
-        <tr><td colspan="3" class="empty-state">Sin datos aún</td></tr>
-      </tbody>
-    </table>
-  </div>
 </div>
 
 <!-- HISTORIAL -->
@@ -598,6 +624,7 @@ create index on repostajes (fecha desc);</code>
       <h2>Historial completo</h2>
       <span id="hist-count" style="font-size:12px;color:var(--muted)"></span>
     </div>
+    <div class="table-scroll">
     <table>
       <thead>
         <tr>
@@ -611,6 +638,7 @@ create index on repostajes (fecha desc);</code>
         <tr><td colspan="4" class="empty-state">Sin datos aún</td></tr>
       </tbody>
     </table>
+    </div>
   </div>
 </div>
 
@@ -682,10 +710,17 @@ create index on repostajes (fecha desc);</code>
   }
 
   // ── TABS ───────────────────────────────────────────────────────────
-  function switchTab(tab) {
+  const TAB_ORDER = ['dashboard', 'historial', 'config'];
+  function switchTab(tab, e) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    event.target.classList.add('active');
+    // si el click vino de un tab, usar ese; si no, buscar por índice
+    let btn = e && (e.currentTarget || (e.target && e.target.closest('.tab')));
+    if (!btn) {
+      const idx = TAB_ORDER.indexOf(tab);
+      btn = document.querySelectorAll('.tab')[idx];
+    }
+    if (btn) btn.classList.add('active');
     document.getElementById('panel-' + tab).classList.add('active');
     if (tab === 'historial' && connected) loadHistorial();
   }
@@ -765,7 +800,6 @@ create index on repostajes (fecha desc);</code>
       if (!res.ok) throw new Error(await res.text());
       allRepostajes = await res.json();
       renderStats();
-      renderRecent();
     } catch (e) {
       notify('Error cargando datos: ' + e.message, 'error');
     }
@@ -845,23 +879,6 @@ create index on repostajes (fecha desc);</code>
     return n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
   }
 
-  // ── RENDER RECENT ──────────────────────────────────────────────────
-  function renderRecent() {
-    const tbody = document.getElementById('recent-tbody');
-    const recent = allRepostajes.slice(0, 5);
-    if (!recent.length) {
-      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Sin repostajes aún</td></tr>';
-      return;
-    }
-    tbody.innerHTML = recent.map(r => `
-      <tr>
-        <td>${formatDate(r.fecha)}</td>
-        <td class="amount-cell">${fmt(r.importe)}</td>
-        <td style="color:var(--muted)">${r.notas || '—'}</td>
-      </tr>
-    `).join('');
-  }
-
   // ── HISTORIAL ──────────────────────────────────────────────────────
   async function loadHistorial() {
     if (!connected) return;
@@ -886,7 +903,15 @@ create index on repostajes (fecha desc);</code>
         <td>${formatDate(r.fecha)}</td>
         <td class="amount-cell">${fmt(parseFloat(r.importe))}</td>
         <td style="color:var(--muted)">${r.notas || '—'}</td>
-        <td><button class="btn btn-danger" onclick="deleteRepostaje('${r.id}')">Borrar</button></td>
+        <td><button class="btn-icon" onclick="deleteRepostaje('${r.id}')" aria-label="Borrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6"/>
+            <path d="M14 11v6"/>
+            <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button></td>
       </tr>
     `).join('');
   }
