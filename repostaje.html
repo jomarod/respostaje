@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarjeta Gasolina</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181d;
+    --surface2: #1e2128;
+    --border: #2a2d35;
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --muted: #6b6f7a;
+    --danger: #ff4444;
+    --success: #4ade80;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 24px 32px 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--accent);
+  }
+
+  .logo span { color: var(--muted); font-weight: 400; font-size: 14px; margin-left: 8px; }
+
+  /* TABS */
+  nav {
+    display: flex;
+    gap: 0;
+    padding: 24px 32px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+
+  .tab {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* PANELS */
+  .panel { display: none; padding: 0 32px 32px; }
+  .panel.active { display: block; }
+
+  /* SETUP BANNER */
+  #setup-banner {
+    background: var(--surface);
+    border: 1px solid var(--accent2);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+
+  #setup-banner h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--accent2);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  #setup-banner p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  #setup-banner code {
+    display: block;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .setup-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  /* CARD OVERVIEW */
+  .overview {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+
+  .stat-card.featured {
+    border-color: var(--accent);
+    background: #1a1e0e;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -1px;
+  }
+
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.danger { color: var(--danger); }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 12px;
+  }
+
+  .progress-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    background: var(--accent);
+  }
+
+  .progress-fill.warning { background: var(--accent2); }
+  .progress-fill.danger { background: var(--danger); }
+
+  /* FORM */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  .form-card h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
+  .form-grid.budget-grid { grid-template-columns: 1fr 1fr auto; }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--text);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .field input:focus { border-color: var(--accent); }
+
+  .field textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    resize: none;
+    rows: 2;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field textarea:focus { border-color: var(--accent); }
+
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0e0f11;
+  }
+  .btn-primary:hover { background: #d4e83f; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+  .btn-danger:hover { background: var(--danger); color: #fff; }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .table-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .table-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 12px 24px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  tbody td {
+    padding: 14px 24px;
+    font-size: 13px;
+  }
+
+  .amount-cell {
+    font-weight: 500;
+    color: var(--accent2);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* NOTIFICATION */
+  #notification {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 13px;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    max-width: 320px;
+  }
+
+  #notification.show { transform: translateX(0); }
+  #notification.success { border-color: var(--success); color: var(--success); }
+  #notification.error { border-color: var(--danger); color: var(--danger); }
+
+  .conn-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .conn-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .conn-status.connected .conn-dot { background: var(--success); }
+  .conn-status.connected { color: var(--success); border-color: var(--success); }
+
+  @media (max-width: 768px) {
+    header, nav, .panel { padding-left: 16px; padding-right: 16px; }
+    .overview { grid-template-columns: 1fr 1fr; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .form-grid .btn { grid-column: 1 / -1; }
+    .setup-fields { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⛽ GasCard <span>Control de gasto</span></div>
+  <div style="margin-left:auto">
+    <div class="conn-status" id="conn-status">
+      <div class="conn-dot"></div>
+      <span id="conn-text">Sin conectar</span>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="tab" onclick="switchTab('historial')">Historial</button>
+  <button class="tab" onclick="switchTab('config')">Configuración</button>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="panel active" id="panel-dashboard">
+
+  <div id="setup-banner">
+    <h3>⚡ Configura Supabase primero</h3>
+    <p>Ve a la pestaña <strong>Configuración</strong> e introduce tus credenciales de Supabase. Después ejecuta este SQL en el editor de Supabase para crear la tabla:</p>
+    <code>create table repostajes (
+  id uuid primary key default gen_random_uuid(),
+  fecha date not null,
+  importe numeric(10,2) not null,
+  notas text,
+  created_at timestamptz default now()
+);
+
+-- Opcional: ordena por fecha desc
+create index on repostajes (fecha desc);</code>
+    <button class="btn btn-ghost" onclick="switchTab('config')">Ir a Configuración →</button>
+  </div>
+
+  <!-- Presupuesto -->
+  <div class="form-card">
+    <h2>Presupuesto del período</h2>
+    <div class="form-grid budget-grid">
+      <div class="field">
+        <label>Descripción del período</label>
+        <input type="text" id="budget-label" placeholder="Ej: Mayo 2025, Semana 18…">
+      </div>
+      <div class="field">
+        <label>Saldo total (€)</label>
+        <input type="number" id="budget-total" placeholder="500.00" step="0.01" min="0">
+      </div>
+      <button class="btn btn-primary" onclick="saveBudget()">Guardar</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="overview">
+    <div class="stat-card featured">
+      <div class="stat-label">Saldo disponible</div>
+      <div class="stat-value accent" id="stat-remaining">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Gastado</div>
+      <div class="stat-value" id="stat-spent">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Presupuesto total</div>
+      <div class="stat-value" id="stat-total">—</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-header">
+      <span id="progress-label">Uso del presupuesto</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Nuevo repostaje -->
+  <div class="form-card">
+    <h2>Registrar repostaje</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label>Fecha</label>
+        <input type="date" id="input-fecha">
+      </div>
+      <div class="field">
+        <label>Importe (€)</label>
+        <input type="number" id="input-importe" placeholder="0.00" step="0.01" min="0.01">
+      </div>
+      <div class="field">
+        <label>Notas (opcional)</label>
+        <input type="text" id="input-notas" placeholder="Gasolinera, km…">
+      </div>
+      <button class="btn btn-primary" id="btn-guardar" onclick="guardarRepostaje()" disabled>Guardar</button>
+    </div>
+  </div>
+
+  <!-- Últimos repostajes -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <h2>Últimos repostajes</h2>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Importe</th>
+          <th>Notas</th>
+        </tr>
+      </thead>
+      <tbody id="recent-tbody">
+        <tr><td colspan="3" class="empty-state">Sin datos aún</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- HISTORIAL -->
+<div class="panel" id="panel-historial">
+  <div class="table-wrap">
+    <div class="table-header">
+      <h2>Historial completo</h2>
+      <span id="hist-count" style="font-size:12px;color:var(--muted)"></span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Importe</th>
+          <th>Notas</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="hist-tbody">
+        <tr><td colspan="4" class="empty-state">Sin datos aún</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CONFIG -->
+<div class="panel" id="panel-config">
+  <div class="form-card">
+    <h2>Conexión Supabase</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:20px">Encuéntralas en tu proyecto Supabase → Settings → API</p>
+    <div class="setup-fields">
+      <div class="field">
+        <label>URL del proyecto</label>
+        <input type="text" id="cfg-url" placeholder="https://xxxx.supabase.co">
+      </div>
+      <div class="field">
+        <label>Anon Key</label>
+        <input type="text" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIs…">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveConfig()">Conectar y probar</button>
+  </div>
+
+  <div class="form-card" style="margin-top:0">
+    <h2>SQL para crear la tabla</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Ejecuta esto una vez en el SQL Editor de tu proyecto Supabase:</p>
+    <code style="display:block;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:16px;font-size:12px;color:var(--accent);white-space:pre;overflow-x:auto;font-family:'IBM Plex Mono',monospace">create table repostajes (
+  id uuid primary key default gen_random_uuid(),
+  fecha date not null,
+  importe numeric(10,2) not null,
+  notas text,
+  created_at timestamptz default now()
+);
+
+create index on repostajes (fecha desc);</code>
+  </div>
+</div>
+
+<div id="notification"></div>
+
+<script>
+  // ── STATE ──────────────────────────────────────────────────────────
+  let supabaseUrl = localStorage.getItem('gc_url') || '';
+  let supabaseKey = localStorage.getItem('gc_key') || '';
+  let budget = JSON.parse(localStorage.getItem('gc_budget') || 'null');
+  let allRepostajes = [];
+  let connected = false;
+
+  // ── INIT ───────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    // fecha de hoy por defecto
+    document.getElementById('input-fecha').value = today();
+
+    // cargar config guardada
+    if (supabaseUrl) document.getElementById('cfg-url').value = supabaseUrl;
+    if (supabaseKey) document.getElementById('cfg-key').value = supabaseKey;
+
+    // cargar presupuesto
+    if (budget) {
+      document.getElementById('budget-label').value = budget.label || '';
+      document.getElementById('budget-total').value = budget.total || '';
+    }
+
+    if (supabaseUrl && supabaseKey) {
+      initConnection();
+    }
+  });
+
+  function today() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // ── TABS ───────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+    if (tab === 'historial' && connected) loadHistorial();
+  }
+
+  // ── CONFIG ─────────────────────────────────────────────────────────
+  async function saveConfig() {
+    supabaseUrl = document.getElementById('cfg-url').value.trim().replace(/\/$/, '');
+    supabaseKey = document.getElementById('cfg-key').value.trim();
+
+    if (!supabaseUrl || !supabaseKey) {
+      notify('Rellena URL y Key', 'error'); return;
+    }
+
+    localStorage.setItem('gc_url', supabaseUrl);
+    localStorage.setItem('gc_key', supabaseKey);
+
+    await initConnection();
+  }
+
+  async function initConnection() {
+    try {
+      const res = await sbFetch('GET', '/rest/v1/repostajes?select=count&limit=1');
+      if (res.ok) {
+        connected = true;
+        setStatus(true);
+        document.getElementById('setup-banner').style.display = 'none';
+        document.getElementById('btn-guardar').disabled = false;
+        notify('Conectado correctamente ✓', 'success');
+        await loadAll();
+      } else {
+        const err = await res.json();
+        notify('Error: ' + (err.message || err.hint || 'revisa credenciales'), 'error');
+        setStatus(false);
+      }
+    } catch (e) {
+      notify('No se pudo conectar: ' + e.message, 'error');
+      setStatus(false);
+    }
+  }
+
+  function setStatus(ok) {
+    const el = document.getElementById('conn-status');
+    const txt = document.getElementById('conn-text');
+    el.className = 'conn-status' + (ok ? ' connected' : '');
+    txt.textContent = ok ? 'Conectado' : 'Sin conectar';
+  }
+
+  // ── SUPABASE HELPER ────────────────────────────────────────────────
+  function sbFetch(method, path, body) {
+    return fetch(supabaseUrl + path, {
+      method,
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': 'Bearer ' + supabaseKey,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+  }
+
+  // ── BUDGET ─────────────────────────────────────────────────────────
+  function saveBudget() {
+    const label = document.getElementById('budget-label').value.trim();
+    const total = parseFloat(document.getElementById('budget-total').value);
+    if (!total || total <= 0) { notify('Introduce un importe válido', 'error'); return; }
+    budget = { label, total };
+    localStorage.setItem('gc_budget', JSON.stringify(budget));
+    notify('Presupuesto guardado', 'success');
+    renderStats();
+  }
+
+  // ── LOAD DATA ──────────────────────────────────────────────────────
+  async function loadAll() {
+    try {
+      const res = await sbFetch('GET', '/rest/v1/repostajes?select=*&order=fecha.desc,created_at.desc');
+      if (!res.ok) throw new Error(await res.text());
+      allRepostajes = await res.json();
+      renderStats();
+      renderRecent();
+    } catch (e) {
+      notify('Error cargando datos: ' + e.message, 'error');
+    }
+  }
+
+  // ── GUARDAR REPOSTAJE ──────────────────────────────────────────────
+  async function guardarRepostaje() {
+    if (!connected) { notify('Conecta Supabase primero', 'error'); return; }
+
+    const fecha = document.getElementById('input-fecha').value;
+    const importe = parseFloat(document.getElementById('input-importe').value);
+    const notas = document.getElementById('input-notas').value.trim();
+
+    if (!fecha) { notify('Selecciona una fecha', 'error'); return; }
+    if (!importe || importe <= 0) { notify('Introduce un importe válido', 'error'); return; }
+
+    const btn = document.getElementById('btn-guardar');
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+
+    try {
+      const res = await sbFetch('POST', '/rest/v1/repostajes', { fecha, importe, notas: notas || null });
+      if (!res.ok) throw new Error(await res.text());
+
+      document.getElementById('input-importe').value = '';
+      document.getElementById('input-notas').value = '';
+      document.getElementById('input-fecha').value = today();
+
+      await loadAll();
+      notify('Repostaje guardado ✓', 'success');
+    } catch (e) {
+      notify('Error: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar';
+    }
+  }
+
+  // ── DELETE ─────────────────────────────────────────────────────────
+  async function deleteRepostaje(id) {
+    if (!confirm('¿Eliminar este repostaje?')) return;
+    try {
+      const res = await sbFetch('DELETE', `/rest/v1/repostajes?id=eq.${id}`);
+      if (!res.ok) throw new Error(await res.text());
+      await loadAll();
+      if (document.getElementById('panel-historial').classList.contains('active')) renderHistorial();
+      notify('Eliminado', 'success');
+    } catch (e) {
+      notify('Error al eliminar: ' + e.message, 'error');
+    }
+  }
+
+  // ── RENDER STATS ───────────────────────────────────────────────────
+  function renderStats() {
+    const total = budget ? budget.total : 0;
+    const spent = allRepostajes.reduce((s, r) => s + parseFloat(r.importe), 0);
+    const remaining = total - spent;
+    const pct = total > 0 ? Math.min(100, (spent / total) * 100) : 0;
+
+    document.getElementById('stat-total').textContent = total > 0 ? fmt(total) : '—';
+    document.getElementById('stat-spent').textContent = fmt(spent);
+
+    const remEl = document.getElementById('stat-remaining');
+    remEl.textContent = total > 0 ? fmt(remaining) : '—';
+    remEl.className = 'stat-value ' + (remaining < 0 ? 'danger' : 'accent');
+
+    const bar = document.getElementById('progress-bar');
+    bar.style.width = pct + '%';
+    bar.className = 'progress-fill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warning' : '');
+
+    document.getElementById('progress-pct').textContent = total > 0 ? pct.toFixed(1) + '%' : '—';
+    document.getElementById('progress-label').textContent =
+      budget ? (budget.label || 'Uso del presupuesto') : 'Uso del presupuesto';
+  }
+
+  function fmt(n) {
+    return n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+  }
+
+  // ── RENDER RECENT ──────────────────────────────────────────────────
+  function renderRecent() {
+    const tbody = document.getElementById('recent-tbody');
+    const recent = allRepostajes.slice(0, 5);
+    if (!recent.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Sin repostajes aún</td></tr>';
+      return;
+    }
+    tbody.innerHTML = recent.map(r => `
+      <tr>
+        <td>${formatDate(r.fecha)}</td>
+        <td class="amount-cell">${fmt(r.importe)}</td>
+        <td style="color:var(--muted)">${r.notas || '—'}</td>
+      </tr>
+    `).join('');
+  }
+
+  // ── HISTORIAL ──────────────────────────────────────────────────────
+  async function loadHistorial() {
+    if (!connected) return;
+    try {
+      const res = await sbFetch('GET', '/rest/v1/repostajes?select=*&order=fecha.desc,created_at.desc');
+      allRepostajes = await res.json();
+    } catch(e) {}
+    renderHistorial();
+  }
+
+  function renderHistorial() {
+    const tbody = document.getElementById('hist-tbody');
+    document.getElementById('hist-count').textContent =
+      allRepostajes.length ? `${allRepostajes.length} registros` : '';
+
+    if (!allRepostajes.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Sin repostajes aún</td></tr>';
+      return;
+    }
+    tbody.innerHTML = allRepostajes.map(r => `
+      <tr>
+        <td>${formatDate(r.fecha)}</td>
+        <td class="amount-cell">${fmt(parseFloat(r.importe))}</td>
+        <td style="color:var(--muted)">${r.notas || '—'}</td>
+        <td><button class="btn btn-danger" onclick="deleteRepostaje('${r.id}')">Borrar</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function formatDate(d) {
+    if (!d) return '—';
+    const [y, m, day] = d.split('-');
+    return `${day}/${m}/${y}`;
+  }
+
+  // ── NOTIFICATION ───────────────────────────────────────────────────
+  let notifTimer;
+  function notify(msg, type = 'success') {
+    const el = document.getElementById('notification');
+    el.textContent = msg;
+    el.className = 'show ' + type;
+    clearTimeout(notifTimer);
+    notifTimer = setTimeout(() => el.className = '', 3000);
+  }
+</script>
+</body>
+</html>
