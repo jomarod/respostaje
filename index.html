@@ -2,949 +2,829 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0e0f11">
-<title>Tarjeta Gasolina</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e0f11" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f7f2" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GasCard">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" href="./icons/icon-192.png">
+<title>GasCard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
   :root {
     --bg: #0e0f11;
     --surface: #16181d;
     --surface2: #1e2128;
     --border: #2a2d35;
     --accent: #e8ff47;
+    --accent-ink: #e8ff47;   /* acento usado como color de texto */
+    --on-accent: #0e0f11;
+    --featured-bg: #1a1e0e;
     --accent2: #ff6b35;
     --text: #f0f0f0;
-    --muted: #6b6f7a;
-    --danger: #ff4444;
+    --muted: #8a8e99;
+    --danger: #ff5555;
     --success: #4ade80;
+    --nav-h: 64px;
+    --radius: 12px;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f6f7f2;
+      --surface: #ffffff;
+      --surface2: #eef0e8;
+      --border: #dcdfd4;
+      --accent: #d9f000;
+      --accent-ink: #4f5e00;
+      --on-accent: #0e0f11;
+      --featured-bg: #f7fbdc;
+      --accent2: #c2410c;
+      --text: #15171b;
+      --muted: #5f636d;
+      --danger: #c62828;
+      --success: #15803d;
+      color-scheme: light;
+    }
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
+  html { -webkit-text-size-adjust: 100%; }
   body {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
+    min-height: 100dvh;
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
   }
+  button, input { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
 
+  /* ── HEADER ─────────────────────────────────────────── */
   header {
-    padding: 24px 32px 0;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 22px;
-    letter-spacing: -0.5px;
-    color: var(--accent);
-  }
-
-  .logo span { color: var(--muted); font-weight: 400; font-size: 14px; margin-left: 8px; }
-
-  /* TABS */
-  nav {
-    display: flex;
-    gap: 0;
-    padding: 24px 32px 0;
+    position: sticky; top: 0; z-index: 20;
+    background: var(--bg);
+    padding: calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 16px) 12px calc(env(safe-area-inset-left) + 16px);
+    display: flex; align-items: center; gap: 12px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 32px;
-    justify-content: center;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; color: var(--accent-ink); }
+  .logo small { display: block; font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 11px; color: var(--muted); letter-spacing: 0; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--muted);
+    padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);
+  }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+  .pill.ok { color: var(--success); border-color: var(--success); }
+  .pill.ok .dot { background: var(--success); }
+  .pill.off { color: var(--danger); border-color: var(--danger); }
+  .pill.off .dot { background: var(--danger); }
+
+  #offline-banner {
+    background: var(--danger); color: #fff; font-size: 13px; text-align: center;
+    padding: 8px calc(env(safe-area-inset-right) + 16px) 8px calc(env(safe-area-inset-left) + 16px);
   }
 
-  .tab {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 32px;
-    cursor: pointer;
-    color: var(--muted);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: all 0.2s;
-    background: none;
-    border-top: none;
-    border-left: none;
-    border-right: none;
-    flex: 1;
-    max-width: 160px;
+  /* ── LAYOUT ─────────────────────────────────────────── */
+  main { padding: 16px calc(env(safe-area-inset-right) + 16px) 0 calc(env(safe-area-inset-left) + 16px); max-width: 960px; margin: 0 auto; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; margin-bottom: 16px;
   }
+  .card h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 14px; }
+  .card p.hint { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
 
-  .tab svg {
-    width: 22px;
-    height: 22px;
-    pointer-events: none;
-  }
-
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  /* PANELS */
-  .panel { display: none; padding: 0 32px 32px; }
-  .panel.active { display: block; }
-
-  /* SETUP BANNER */
-  #setup-banner {
-    background: var(--surface);
-    border: 1px solid var(--accent2);
-    border-radius: 8px;
-    padding: 20px 24px;
-    margin-bottom: 28px;
-  }
-
-  #setup-banner h3 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--accent2);
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
-  #setup-banner p {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 16px;
-    line-height: 1.6;
-  }
-
-  #setup-banner code {
-    display: block;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 12px 16px;
-    font-size: 11px;
-    color: var(--accent);
-    margin-bottom: 16px;
-    white-space: pre;
-    overflow-x: auto;
-  }
-
-  .setup-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-
-  /* CARD OVERVIEW */
-  .overview {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px 24px;
-  }
-
-  .stat-card.featured {
-    border-color: var(--accent);
-    background: #1a1e0e;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
-
-  .stat-value {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 32px;
-    letter-spacing: -1px;
-  }
-
-  .stat-value.accent { color: var(--accent); }
-  .stat-value.danger { color: var(--danger); }
-
-  /* PROGRESS BAR */
-  .progress-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px 24px;
-    margin-bottom: 32px;
-  }
-
-  .progress-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    font-size: 12px;
-  }
-
-  .progress-track {
-    height: 8px;
-    background: var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.5s ease;
-    background: var(--accent);
-  }
-
-  .progress-fill.warning { background: var(--accent2); }
-  .progress-fill.danger { background: var(--danger); }
-
-  /* FORM */
-  .form-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 24px;
-    margin-bottom: 32px;
-  }
-
-  .form-card h2 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 16px;
-    margin-bottom: 20px;
-  }
-
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
-  .form-grid.budget-grid { grid-template-columns: 1fr 1fr auto; }
-  .form-grid.repostaje-grid { grid-template-columns: 1fr 1fr auto; }
-
+  /* ── FORMS ──────────────────────────────────────────── */
+  .grid { display: grid; gap: 10px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
   .field label {
-    display: block;
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
+    display: block; font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;
   }
-
   .field input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 14px;
-    color: var(--text);
-    transition: border-color 0.2s;
-    outline: none;
+    width: 100%; min-height: 48px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 16px; outline: none;
+    transition: border-color .2s; -webkit-appearance: none; appearance: none;
   }
-
-  .field input:focus { border-color: var(--accent); }
-
-  .field textarea {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    color: var(--text);
-    resize: none;
-    rows: 2;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .field textarea:focus { border-color: var(--accent); }
+  .field input[type="date"] { display: block; }
+  .field input:focus { border-color: var(--accent-ink); }
+  .field input[aria-invalid="true"] { border-color: var(--danger); }
 
   .btn {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 10px 24px;
-    border-radius: 6px;
-    cursor: pointer;
-    border: none;
-    transition: all 0.15s;
-    white-space: nowrap;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    min-height: 48px; padding: 12px 20px; border-radius: 8px;
+    cursor: pointer; border: none; white-space: nowrap;
+    transition: transform .1s, background .15s, opacity .15s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn:active:not(:disabled) { transform: scale(0.97); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: var(--on-accent); }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:active:not(:disabled) { background: var(--surface2); }
+  .btn-link { background: none; border: none; color: var(--accent-ink); font-size: 13px; text-decoration: underline; min-height: 44px; cursor: pointer; }
+  .btn-block { width: 100%; }
+  .actions { display: grid; gap: 8px; margin-top: 12px; }
+
+  /* Repostaje: fecha + importe en una línea; botón debajo en móviles estrechos */
+  .repostaje-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .repostaje-grid .btn { grid-column: 1 / -1; }
+  @media (min-width: 420px) {
+    .repostaje-grid { grid-template-columns: 1fr 1fr auto; align-items: end; }
+    .repostaje-grid .btn { grid-column: auto; }
   }
 
-  .btn-primary {
-    background: var(--accent);
-    color: #0e0f11;
+  /* ── STATS ──────────────────────────────────────────── */
+  .overview { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; min-width: 0; }
+  .stat.featured { grid-column: 1 / -1; border-color: var(--accent-ink); background: var(--featured-bg); padding: 18px; }
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; overflow-wrap: anywhere; }
+  .stat.featured .stat-value { font-size: 38px; color: var(--accent-ink); }
+  .stat.featured .stat-value.neg { color: var(--danger); }
+
+  .progress { margin-bottom: 16px; }
+  .progress-head { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; margin-bottom: 10px; }
+  .progress-head span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .progress-head span:last-child { white-space: nowrap; flex-shrink: 0; }
+  .track { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .fill { height: 100%; width: 0; background: var(--accent); border-radius: 4px; transition: width .5s ease; }
+  .fill.warning { background: var(--accent2); }
+  .fill.danger { background: var(--danger); }
+
+  /* ── HISTORIAL (tarjetas en móvil, tabla desde 768 px) ─ */
+  .list-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .list-head h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; }
+  .list-head span { font-size: 12px; color: var(--muted); }
+  .rows { display: grid; gap: 8px; }
+  .row {
+    display: grid; grid-template-columns: 1fr auto 44px; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 10px 10px 10px 16px;
   }
-  .btn-primary:hover { background: #d4e83f; transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .row-date { font-size: 14px; }
+  .row-date small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+  .row-amount { font-weight: 500; color: var(--accent2); font-size: 15px; white-space: nowrap; }
+  .row-th { display: none; }
 
-  .btn-ghost {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
+  .icon-btn {
+    width: 44px; height: 44px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
   }
-  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .icon-btn:active:not(:disabled) { color: var(--danger); border-color: var(--danger); }
+  .icon-btn:disabled { opacity: .4; }
 
-  .btn-danger {
-    background: transparent;
-    color: var(--danger);
-    border: 1px solid var(--danger);
-    font-size: 11px;
-    padding: 6px 12px;
+  @media (min-width: 768px) {
+    .overview { grid-template-columns: 2fr 1fr 1fr; }
+    .stat.featured { grid-column: auto; }
+    .rows { gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .row { grid-template-columns: 160px 140px 1fr 44px; border: none; border-radius: 0; border-bottom: 1px solid var(--border); }
+    .row:last-child { border-bottom: none; }
+    .row-th { display: grid; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; padding-top: 14px; padding-bottom: 14px; }
+    .row-date small { display: none; }
+    .row-notes { display: block !important; color: var(--muted); font-size: 13px; }
+    .row-amount { order: 0; }
   }
-  .btn-danger:hover { background: var(--danger); color: #fff; }
+  .row-notes { display: none; }
+  .row:hover { background: var(--surface2); }
 
-  .btn-icon {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border-radius: 6px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
+  .empty, .error-box { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+  .error-box { color: var(--danger); }
+  .error-box .btn { margin-top: 12px; }
+
+  /* Skeleton */
+  .sk { background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: sk 1.2s infinite; border-radius: 6px; color: transparent !important; }
+  .sk-row { height: 64px; border-radius: var(--radius); }
+  @keyframes sk { to { background-position: -200% 0; } }
+
+  /* ── BOTTOM NAV ─────────────────────────────────────── */
+  nav.bottom {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    display: flex; justify-content: center;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
-  .btn-icon svg { width: 16px; height: 16px; }
-  .btn-icon:hover { color: var(--danger); border-color: var(--danger); }
-
-  /* TABLE */
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
+  nav.bottom button {
+    flex: 1; max-width: 180px; height: var(--nav-h);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    background: none; border: none; color: var(--muted); cursor: pointer; font-size: 11px;
   }
+  nav.bottom button svg { width: 22px; height: 22px; pointer-events: none; }
+  nav.bottom button.active { color: var(--accent-ink); }
+  nav.bottom button:active { background: var(--surface2); }
 
-  .table-header {
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  /* ── TOAST ──────────────────────────────────────────── */
+  #toast {
+    position: fixed; z-index: 50;
+    left: calc(env(safe-area-inset-left) + 16px); right: calc(env(safe-area-inset-right) + 16px);
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);
+    max-width: 420px; margin: 0 auto;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    transform: translateY(20px); opacity: 0; pointer-events: none;
+    transition: transform .25s ease, opacity .25s ease;
   }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-color: var(--success); color: var(--success); }
+  #toast.error { border-color: var(--danger); color: var(--danger); }
 
-  .table-header h2 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 16px;
+  /* ── BOTTOM SHEET (aviso iOS) ───────────────────────── */
+  .sheet-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; }
+  .sheet {
+    width: 100%; background: var(--surface); border-radius: 16px 16px 0 0; border-top: 1px solid var(--border);
+    padding: 20px calc(env(safe-area-inset-right) + 20px) calc(env(safe-area-inset-bottom) + 20px) calc(env(safe-area-inset-left) + 20px);
   }
+  .sheet h3 { font-family: 'Syne', sans-serif; font-size: 16px; margin-bottom: 10px; }
+  .sheet p { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+  /* Sin sesión: ocultar navegación */
+  body.no-session nav.bottom { display: none; }
+  body.no-session { padding-bottom: calc(env(safe-area-inset-bottom) + 16px); }
 
-  thead th {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    padding: 12px 24px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
+  .meta { font-size: 12px; color: var(--muted); line-height: 1.8; }
+  .meta strong { color: var(--text); font-weight: 500; }
 
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
-  }
-
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--surface2); }
-
-  tbody td {
-    padding: 14px 24px;
-    font-size: 13px;
-  }
-
-  .amount-cell {
-    font-weight: 500;
-    color: var(--accent2);
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 48px 24px;
-    color: var(--muted);
-    font-size: 13px;
-  }
-
-  /* NOTIFICATION */
-  #notification {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 20px;
-    font-size: 13px;
-    transform: translateX(120%);
-    transition: transform 0.3s ease;
-    z-index: 999;
-    max-width: 320px;
-  }
-
-  #notification.show { transform: translateX(0); }
-  #notification.success { border-color: var(--success); color: var(--success); }
-  #notification.error { border-color: var(--danger); color: var(--danger); }
-
-  .conn-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--muted);
-    padding: 4px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-  }
-
-  .conn-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--muted);
-  }
-
-  .conn-status.connected .conn-dot { background: var(--success); }
-  .conn-status.connected { color: var(--success); border-color: var(--success); }
-
-  @media (max-width: 768px) {
-    header {
-      padding: 16px 16px 0;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .logo { font-size: 18px; }
-    .logo span { display: block; margin-left: 0; margin-top: 2px; font-size: 11px; }
-
-    nav {
-      padding: 16px 16px 0;
-      margin-bottom: 20px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    nav::-webkit-scrollbar { display: none; }
-    .tab {
-      padding: 10px 16px;
-      font-size: 12px;
-      flex-shrink: 0;
-    }
-
-    .panel { padding: 0 16px 24px; }
-
-    /* stats apiladas en una sola columna en móvil */
-    .overview {
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .overview .featured {
-      padding: 18px 20px;
-    }
-    .stat-card { padding: 14px 18px; }
-    .stat-value { font-size: 26px; }
-    .overview .featured .stat-value { font-size: 36px; }
-    .stat-label { font-size: 10px; margin-bottom: 6px; }
-
-    /* forms apilados verticalmente en móvil, excepto repostaje que queda en línea */
-    .form-card { padding: 18px; margin-bottom: 20px; }
-    .form-card h2 { font-size: 14px; margin-bottom: 14px; }
-    .form-grid,
-    .form-grid.budget-grid {
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-    .form-grid .btn,
-    .form-grid.budget-grid .btn {
-      width: 100%;
-      padding: 14px;
-    }
-
-    /* repostaje sigue en una línea en móvil */
-    .form-grid.repostaje-grid {
-      grid-template-columns: 1fr 1fr auto;
-      gap: 8px;
-    }
-    .form-grid.repostaje-grid .btn {
-      width: auto;
-      padding: 10px 14px;
-      font-size: 11px;
-      align-self: end;
-    }
-    .form-grid.repostaje-grid .field input {
-      padding: 10px 10px;
-      font-size: 13px;
-    }
-    .form-grid.repostaje-grid .field label {
-      font-size: 10px;
-      letter-spacing: 0.04em;
-    }
-
-    .setup-fields { grid-template-columns: 1fr; }
-
-    .progress-wrap { padding: 16px 18px; margin-bottom: 20px; }
-
-    /* tablas: scroll horizontal si no cabe */
-    .table-header { padding: 14px 16px; }
-    .table-header h2 { font-size: 14px; }
-    .table-wrap { overflow: hidden; }
-    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    thead th, tbody td { padding: 10px 12px; font-size: 12px; }
-    tbody td.amount-cell { white-space: nowrap; }
-    tbody td:first-child { white-space: nowrap; }
-
-    /* notification full-width en móvil */
-    #notification {
-      top: auto;
-      bottom: 16px;
-      right: 16px;
-      left: 16px;
-      max-width: none;
-      transform: translateY(150%);
-    }
-    #notification.show { transform: translateY(0); }
-
-    .conn-status { font-size: 10px; padding: 3px 8px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
-<body>
+<body class="no-session">
 
 <header>
-  <div class="logo">⛽ GasCard <span>Control de gasto</span></div>
-  <div style="margin-left:auto">
-    <div class="conn-status" id="conn-status">
-      <div class="conn-dot"></div>
-      <span id="conn-text">Sin conectar</span>
-    </div>
+  <div class="logo">⛽ GasCard <small>Control de gasto</small></div>
+  <div class="header-right">
+    <span class="pill" id="net-pill"><span class="dot"></span><span id="net-text">…</span></span>
   </div>
 </header>
+<div id="offline-banner" hidden>Sin conexión. Los cambios no se pueden guardar hasta que vuelva la red.</div>
 
-<nav>
-  <button class="tab active" onclick="switchTab('dashboard', event)" aria-label="Dashboard">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 22V8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v14"/>
-      <path d="M3 22h12"/>
-      <path d="M6 10h6"/>
-      <path d="M6 14h6"/>
-      <path d="M15 10h3a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2V8l-3-3"/>
-    </svg>
+<main>
+
+  <!-- CONFIG (solo si no hay credenciales en el código) -->
+  <section class="view" id="view-config">
+    <div class="card">
+      <h2>Conexión Supabase</h2>
+      <p class="hint">Project Settings → API. Solo la clave <strong>anon</strong>, nunca la service_role.</p>
+      <form id="form-config" class="grid">
+        <div class="field">
+          <label for="cfg-url">URL del proyecto</label>
+          <input id="cfg-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://xxxx.supabase.co" required>
+        </div>
+        <div class="field">
+          <label for="cfg-key">Anon key</label>
+          <input id="cfg-key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="eyJhbGciOiJIUzI1NiIs…" required>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Conectar</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- LOGIN -->
+  <section class="view" id="view-auth">
+    <div class="card">
+      <h2>Iniciar sesión</h2>
+      <form id="form-login" class="grid">
+        <div class="field">
+          <label for="login-email">Email</label>
+          <input id="login-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required>
+        </div>
+        <div class="field">
+          <label for="login-pass">Contraseña</label>
+          <input id="login-pass" type="password" autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" id="btn-login" data-net>Entrar</button>
+      </form>
+      <div class="actions">
+        <button class="btn btn-ghost btn-block" type="button" id="btn-magic" data-net>Enviarme un enlace mágico</button>
+      </div>
+      <p class="hint" style="margin:14px 0 0">Con la app instalada en iPhone, el enlace mágico se abre en Safari y no en la app: usa la contraseña.</p>
+    </div>
+  </section>
+
+  <!-- INICIO -->
+  <section class="view" id="view-dashboard">
+    <div class="card">
+      <h2>Registrar repostaje</h2>
+      <form id="form-repostaje" class="repostaje-grid" novalidate>
+        <div class="field">
+          <label for="input-fecha">Fecha</label>
+          <input type="date" id="input-fecha" required>
+        </div>
+        <div class="field">
+          <label for="input-importe">Importe (€)</label>
+          <input type="text" id="input-importe" inputmode="decimal" autocomplete="off" placeholder="0,00" required>
+        </div>
+        <button class="btn btn-primary" type="submit" id="btn-guardar" data-net>Guardar</button>
+      </form>
+    </div>
+
+    <div class="overview">
+      <div class="stat featured">
+        <div class="stat-label">Saldo disponible</div>
+        <div class="stat-value" id="stat-remaining">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Gastado</div>
+        <div class="stat-value" id="stat-spent">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Presupuesto</div>
+        <div class="stat-value" id="stat-total">—</div>
+      </div>
+    </div>
+
+    <div class="card progress">
+      <div class="progress-head">
+        <span id="progress-label">Uso del presupuesto</span>
+        <span id="progress-pct">—</span>
+      </div>
+      <div class="track"><div class="fill" id="progress-bar"></div></div>
+    </div>
+
+    <div class="card">
+      <h2>Presupuesto del período</h2>
+      <form id="form-budget" class="grid" novalidate>
+        <div class="field">
+          <label for="budget-label">Descripción</label>
+          <input type="text" id="budget-label" autocomplete="off" placeholder="Ej.: Noviembre 2026">
+        </div>
+        <div class="grid grid-2">
+          <div class="field">
+            <label for="budget-total">Saldo total (€)</label>
+            <input type="text" id="budget-total" inputmode="decimal" autocomplete="off" placeholder="500,00" required>
+          </div>
+          <div class="field">
+            <label for="budget-desde">Cuenta desde</label>
+            <input type="date" id="budget-desde">
+          </div>
+        </div>
+        <p class="hint" style="margin:0">Si dejas «Cuenta desde» vacío, se descuentan todos los repostajes.</p>
+        <button class="btn btn-primary btn-block" type="submit" id="btn-budget" data-net>Guardar presupuesto</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- HISTORIAL -->
+  <section class="view" id="view-historial">
+    <div class="list-head">
+      <h2>Historial</h2>
+      <span id="hist-count"></span>
+    </div>
+    <div id="hist"></div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section class="view" id="view-ajustes">
+    <div class="card">
+      <h2>Cuenta</h2>
+      <p class="meta">Sesión: <strong id="user-email">—</strong></p>
+      <div class="actions">
+        <button class="btn btn-ghost btn-block" id="btn-logout" type="button">Cerrar sesión</button>
+      </div>
+    </div>
+    <div class="card" id="card-install" hidden>
+      <h2>Instalar la app</h2>
+      <p class="hint" id="install-text">Añádela a la pantalla de inicio para abrirla como una app.</p>
+      <button class="btn btn-primary btn-block" id="btn-install" type="button" hidden>Instalar</button>
+    </div>
+    <div class="card" id="card-config-reset" hidden>
+      <h2>Conexión</h2>
+      <p class="meta" id="cfg-current"></p>
+      <div class="actions">
+        <button class="btn btn-ghost btn-block" id="btn-reset-config" type="button">Cambiar proyecto Supabase</button>
+      </div>
+    </div>
+    <p class="meta" style="text-align:center">GasCard <span id="app-version"></span></p>
+  </section>
+
+</main>
+
+<nav class="bottom" aria-label="Navegación principal">
+  <button type="button" data-view="dashboard" class="active" aria-label="Inicio">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v14"/><path d="M3 22h12"/><path d="M6 10h6"/><path d="M15 10h3a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2V8l-3-3"/></svg>
+    Inicio
   </button>
-  <button class="tab" onclick="switchTab('historial', event)" aria-label="Historial">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
-      <path d="M8 7h8"/>
-      <path d="M8 11h6"/>
-    </svg>
+  <button type="button" data-view="historial" aria-label="Historial">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h8"/><path d="M8 11h6"/></svg>
+    Historial
   </button>
-  <button class="tab" onclick="switchTab('config', event)" aria-label="Configuración">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-    </svg>
+  <button type="button" data-view="ajustes" aria-label="Ajustes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Ajustes
   </button>
 </nav>
 
-<!-- DASHBOARD -->
-<div class="panel active" id="panel-dashboard">
+<div id="toast" role="status" aria-live="polite"></div>
 
-  <div id="setup-banner">
-    <h3>⚡ Configura Supabase primero</h3>
-    <p>Ve a la pestaña <strong>Configuración</strong> e introduce tus credenciales de Supabase. Después ejecuta este SQL en el editor de Supabase para crear la tabla:</p>
-    <code>create table repostajes (
-  id uuid primary key default gen_random_uuid(),
-  fecha date not null,
-  importe numeric(10,2) not null,
-  notas text,
-  created_at timestamptz default now()
-);
-
--- Opcional: ordena por fecha desc
-create index on repostajes (fecha desc);</code>
-    <button class="btn btn-ghost" onclick="switchTab('config')">Ir a Configuración →</button>
-  </div>
-
-  <!-- Nuevo repostaje (PRIMERO) -->
-  <div class="form-card">
-    <h2>Registrar repostaje</h2>
-    <div class="form-grid repostaje-grid">
-      <div class="field">
-        <label>Fecha</label>
-        <input type="date" id="input-fecha">
-      </div>
-      <div class="field">
-        <label>Importe (€)</label>
-        <input type="number" id="input-importe" placeholder="0.00" step="0.01" min="0.01" inputmode="decimal">
-      </div>
-      <button class="btn btn-primary" id="btn-guardar" onclick="guardarRepostaje()" disabled>Guardar</button>
-    </div>
-  </div>
-
-  <!-- Stats -->
-  <div class="overview">
-    <div class="stat-card featured">
-      <div class="stat-label">Saldo disponible</div>
-      <div class="stat-value accent" id="stat-remaining">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Gastado</div>
-      <div class="stat-value" id="stat-spent">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Presupuesto total</div>
-      <div class="stat-value" id="stat-total">—</div>
-    </div>
-  </div>
-
-  <div class="progress-wrap">
-    <div class="progress-header">
-      <span id="progress-label">Uso del presupuesto</span>
-      <span id="progress-pct">0%</span>
-    </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-bar" style="width:0%"></div>
-    </div>
-  </div>
-
-  <!-- Presupuesto (AL FINAL) -->
-  <div class="form-card">
-    <h2>Presupuesto del período</h2>
-    <div class="form-grid budget-grid">
-      <div class="field">
-        <label>Descripción del período</label>
-        <input type="text" id="budget-label" placeholder="Ej: Mayo 2025, Semana 18…">
-      </div>
-      <div class="field">
-        <label>Saldo total (€)</label>
-        <input type="number" id="budget-total" placeholder="500.00" step="0.01" min="0" inputmode="decimal">
-      </div>
-      <button class="btn btn-primary" onclick="saveBudget()">Guardar</button>
-    </div>
+<div class="sheet-backdrop" id="ios-sheet" hidden>
+  <div class="sheet" role="dialog" aria-labelledby="ios-title">
+    <h3 id="ios-title">Instálala en tu iPhone</h3>
+    <p>Pulsa <strong>Compartir</strong> (el cuadrado con la flecha) y después <strong>Añadir a pantalla de inicio</strong>.</p>
+    <button class="btn btn-primary btn-block" id="ios-ok" type="button">Entendido</button>
   </div>
 </div>
 
-<!-- HISTORIAL -->
-<div class="panel" id="panel-historial">
-  <div class="table-wrap">
-    <div class="table-header">
-      <h2>Historial completo</h2>
-      <span id="hist-count" style="font-size:12px;color:var(--muted)"></span>
-    </div>
-    <div class="table-scroll">
-    <table>
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Importe</th>
-          <th>Notas</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="hist-tbody">
-        <tr><td colspan="4" class="empty-state">Sin datos aún</td></tr>
-      </tbody>
-    </table>
-    </div>
-  </div>
-</div>
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-<!-- CONFIG -->
-<div class="panel" id="panel-config">
-  <div class="form-card">
-    <h2>Conexión Supabase</h2>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:20px">Encuéntralas en tu proyecto Supabase → Settings → API</p>
-    <div class="setup-fields">
-      <div class="field">
-        <label>URL del proyecto</label>
-        <input type="text" id="cfg-url" placeholder="https://xxxx.supabase.co">
-      </div>
-      <div class="field">
-        <label>Anon Key</label>
-        <input type="text" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIs…">
-      </div>
-    </div>
-    <button class="btn btn-primary" onclick="saveConfig()">Conectar y probar</button>
-  </div>
+  // ── CONFIG ────────────────────────────────────────────────────────
+  // Rellena estas dos constantes para no tener que introducirlas en cada móvil.
+  // La anon key es pública por diseño; la protección real es RLS.
+  const SUPABASE_URL = '';
+  const SUPABASE_ANON_KEY = '';
+  const APP_VERSION = '2.0.0';
 
-  <div class="form-card" style="margin-top:0">
-    <h2>SQL para crear la tabla</h2>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Ejecuta esto una vez en el SQL Editor de tu proyecto Supabase:</p>
-    <code style="display:block;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:16px;font-size:12px;color:var(--accent);white-space:pre;overflow-x:auto;font-family:'IBM Plex Mono',monospace">create table repostajes (
-  id uuid primary key default gen_random_uuid(),
-  fecha date not null,
-  importe numeric(10,2) not null,
-  notas text,
-  created_at timestamptz default now()
-);
+  // ── HELPERS ───────────────────────────────────────────────────────
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const eur = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
+  const fFecha = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const fDia = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
 
-create index on repostajes (fecha desc);</code>
-  </div>
-</div>
+  // Fecha local (toISOString daría el día anterior entre las 00:00 y la 01:00/02:00 en España)
+  const hoy = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+  const aFecha = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  // Acepta "45,50", "45.50" y "1.234,56"
+  const parseImporte = v => {
+    let s = String(v).trim().replace(/\s|€/g, '');
+    if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    const n = Number(s);
+    return Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN;
+  };
+  const fmtInput = n => n == null ? '' : String(n).replace('.', ',');
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const errMsg = e => {
+    if (!navigator.onLine) return 'Sin conexión';
+    const m = e?.message || String(e);
+    if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'No se pudo contactar con Supabase';
+    if (/JWT|expired/i.test(m)) return 'La sesión ha caducado, vuelve a entrar';
+    if (/row-level security/i.test(m)) return 'Permiso denegado (revisa RLS)';
+    return m;
+  };
 
-<div id="notification"></div>
-
-<script>
-  // ── STATE ──────────────────────────────────────────────────────────
-  let supabaseUrl = localStorage.getItem('gc_url') || '';
-  let supabaseKey = localStorage.getItem('gc_key') || '';
-  let budget = JSON.parse(localStorage.getItem('gc_budget') || 'null');
-  let allRepostajes = [];
-  let connected = false;
-
-  // ── INIT ───────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    // fecha de hoy por defecto
-    document.getElementById('input-fecha').value = today();
-
-    // cargar config guardada
-    if (supabaseUrl) document.getElementById('cfg-url').value = supabaseUrl;
-    if (supabaseKey) document.getElementById('cfg-key').value = supabaseKey;
-
-    // cargar presupuesto
-    if (budget) {
-      document.getElementById('budget-label').value = budget.label || '';
-      document.getElementById('budget-total').value = budget.total || '';
-    }
-
-    if (supabaseUrl && supabaseKey) {
-      initConnection();
-    }
-  });
-
-  function today() {
-    return new Date().toISOString().split('T')[0];
+  let toastTimer;
+  function toast(msg, type = 'success') {
+    const el = $('#toast');
+    el.textContent = msg;
+    el.className = 'show ' + type;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => (el.className = ''), type === 'error' ? 4500 : 2500);
   }
 
-  // ── TABS ───────────────────────────────────────────────────────────
-  const TAB_ORDER = ['dashboard', 'historial', 'config'];
-  function switchTab(tab, e) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    // si el click vino de un tab, usar ese; si no, buscar por índice
-    let btn = e && (e.currentTarget || (e.target && e.target.closest('.tab')));
-    if (!btn) {
-      const idx = TAB_ORDER.indexOf(tab);
-      btn = document.querySelectorAll('.tab')[idx];
-    }
-    if (btn) btn.classList.add('active');
-    document.getElementById('panel-' + tab).classList.add('active');
-    if (tab === 'historial' && connected) loadHistorial();
+  async function busy(btn, label, fn) {
+    const prev = btn.textContent;
+    btn.disabled = true; btn.textContent = label;
+    try { return await fn(); }
+    finally { btn.textContent = prev; btn.disabled = !navigator.onLine && btn.hasAttribute('data-net'); }
   }
 
-  // ── CONFIG ─────────────────────────────────────────────────────────
-  async function saveConfig() {
-    supabaseUrl = document.getElementById('cfg-url').value.trim().replace(/\/$/, '');
-    supabaseKey = document.getElementById('cfg-key').value.trim();
+  // ── ESTADO ────────────────────────────────────────────────────────
+  let sb = null;
+  let user = null;
+  let repostajes = [];
+  let budget = null;
+  let estado = 'loading'; // loading | ready | error
+  let ultimoError = '';
 
-    if (!supabaseUrl || !supabaseKey) {
-      notify('Rellena URL y Key', 'error'); return;
-    }
+  const cfg = {
+    url: SUPABASE_URL || localStorage.getItem('gc_url') || '',
+    key: SUPABASE_ANON_KEY || localStorage.getItem('gc_key') || ''
+  };
 
-    localStorage.setItem('gc_url', supabaseUrl);
-    localStorage.setItem('gc_key', supabaseKey);
-
-    await initConnection();
+  // ── VISTAS ────────────────────────────────────────────────────────
+  function showView(name) {
+    $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+    $$('nav.bottom button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+    document.body.classList.toggle('no-session', name === 'auth' || name === 'config');
+    window.scrollTo(0, 0);
+    if (name === 'historial') renderHistorial();
   }
+  $$('nav.bottom button').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
 
-  async function initConnection() {
+  // ── RED ───────────────────────────────────────────────────────────
+  function updateNet() {
+    const on = navigator.onLine;
+    $('#offline-banner').hidden = on;
+    const pill = $('#net-pill');
+    pill.className = 'pill ' + (on ? (user ? 'ok' : '') : 'off');
+    $('#net-text').textContent = on ? (user ? 'Conectado' : 'En línea') : 'Sin red';
+    $$('[data-net]').forEach(b => { if (b.textContent.endsWith('…')) return; b.disabled = !on; });
+    $$('.icon-btn').forEach(b => (b.disabled = !on));
+  }
+  addEventListener('online', () => { updateNet(); if (user && estado === 'error') loadAll(); });
+  addEventListener('offline', updateNet);
+
+  // ── ARRANQUE ──────────────────────────────────────────────────────
+  $('#app-version').textContent = 'v' + APP_VERSION;
+  $('#input-fecha').value = hoy();
+  updateNet();
+
+  if (cfg.url && cfg.key) start(); else showView('config');
+
+  function start() {
     try {
-      const res = await sbFetch('GET', '/rest/v1/repostajes?select=count&limit=1');
-      if (res.ok) {
-        connected = true;
-        setStatus(true);
-        document.getElementById('setup-banner').style.display = 'none';
-        document.getElementById('btn-guardar').disabled = false;
-        notify('Conectado correctamente ✓', 'success');
-        await loadAll();
-      } else {
-        const err = await res.json();
-        notify('Error: ' + (err.message || err.hint || 'revisa credenciales'), 'error');
-        setStatus(false);
-      }
+      sb = createClient(cfg.url, cfg.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
     } catch (e) {
-      notify('No se pudo conectar: ' + e.message, 'error');
-      setStatus(false);
+      toast('Configuración no válida: ' + e.message, 'error');
+      showView('config');
+      return;
     }
-  }
-
-  function setStatus(ok) {
-    const el = document.getElementById('conn-status');
-    const txt = document.getElementById('conn-text');
-    el.className = 'conn-status' + (ok ? ' connected' : '');
-    txt.textContent = ok ? 'Conectado' : 'Sin conectar';
-  }
-
-  // ── SUPABASE HELPER ────────────────────────────────────────────────
-  function sbFetch(method, path, body) {
-    return fetch(supabaseUrl + path, {
-      method,
-      headers: {
-        'apikey': supabaseKey,
-        'Authorization': 'Bearer ' + supabaseKey,
-        'Content-Type': 'application/json',
-        'Prefer': method === 'POST' ? 'return=representation' : ''
-      },
-      body: body ? JSON.stringify(body) : undefined
+    if (!SUPABASE_URL) {
+      $('#card-config-reset').hidden = false;
+      $('#cfg-current').textContent = cfg.url;
+    }
+    sb.auth.onAuthStateChange((event, session) => {
+      // No llamar a Supabase dentro del callback (puede bloquearse); diferirlo.
+      setTimeout(() => onSession(session, event), 0);
     });
   }
 
-  // ── BUDGET ─────────────────────────────────────────────────────────
-  function saveBudget() {
-    const label = document.getElementById('budget-label').value.trim();
-    const total = parseFloat(document.getElementById('budget-total').value);
-    if (!total || total <= 0) { notify('Introduce un importe válido', 'error'); return; }
-    budget = { label, total };
-    localStorage.setItem('gc_budget', JSON.stringify(budget));
-    notify('Presupuesto guardado', 'success');
-    renderStats();
+  function onSession(session, event) {
+    const nuevo = session?.user || null;
+    const cambio = nuevo?.id !== user?.id;
+    user = nuevo;
+    updateNet();
+    if (!user) { repostajes = []; budget = null; showView('auth'); return; }
+    $('#user-email').textContent = user.email || '—';
+    if (cambio || event === 'SIGNED_IN') {
+      if (document.body.classList.contains('no-session')) showView('dashboard');
+      loadAll();
+    }
   }
 
-  // ── LOAD DATA ──────────────────────────────────────────────────────
+  // ── CONFIG FORM ───────────────────────────────────────────────────
+  $('#form-config').addEventListener('submit', e => {
+    e.preventDefault();
+    const url = $('#cfg-url').value.trim().replace(/\/$/, '');
+    const key = $('#cfg-key').value.trim();
+    if (!/^https:\/\/.+/.test(url) || !key) { toast('Revisa la URL y la clave', 'error'); return; }
+    if (key.includes('service_role') || /^sb_secret_/.test(key)) { toast('Esa es una clave secreta. Usa la anon.', 'error'); return; }
+    localStorage.setItem('gc_url', url);
+    localStorage.setItem('gc_key', key);
+    cfg.url = url; cfg.key = key;
+    start();
+  });
+  $('#btn-reset-config').addEventListener('click', async () => {
+    if (!confirm('Se cerrará la sesión y tendrás que volver a introducir la conexión. ¿Seguir?')) return;
+    try { await sb?.auth.signOut(); } catch {}
+    localStorage.removeItem('gc_url'); localStorage.removeItem('gc_key');
+    location.reload();
+  });
+
+  // ── AUTH ──────────────────────────────────────────────────────────
+  $('#form-login').addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = $('#login-email').value.trim();
+    const password = $('#login-pass').value;
+    if (!email || !password) { toast('Introduce email y contraseña', 'error'); return; }
+    await busy($('#btn-login'), 'Entrando…', async () => {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) toast(error.message === 'Invalid login credentials' ? 'Email o contraseña incorrectos' : errMsg(error), 'error');
+    });
+  });
+
+  $('#btn-magic').addEventListener('click', async () => {
+    const email = $('#login-email').value.trim();
+    if (!email) { toast('Escribe tu email primero', 'error'); $('#login-email').focus(); return; }
+    await busy($('#btn-magic'), 'Enviando…', async () => {
+      const { error } = await sb.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false }
+      });
+      if (error) toast(errMsg(error), 'error');
+      else toast('Revisa tu correo para entrar');
+    });
+  });
+
+  $('#btn-logout').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    toast('Sesión cerrada');
+  });
+
+  // ── CARGA ─────────────────────────────────────────────────────────
   async function loadAll() {
+    estado = 'loading';
+    renderStats(); renderHistorial();
     try {
-      const res = await sbFetch('GET', '/rest/v1/repostajes?select=*&order=fecha.desc,created_at.desc');
-      if (!res.ok) throw new Error(await res.text());
-      allRepostajes = await res.json();
+      const [r, b] = await Promise.all([
+        sb.from('repostajes').select('id, fecha, importe, notas, created_at').order('fecha', { ascending: false }).order('created_at', { ascending: false }),
+        sb.from('presupuesto').select('etiqueta, total, desde').maybeSingle()
+      ]);
+      if (r.error) throw r.error;
+      if (b.error) throw b.error;
+      repostajes = r.data || [];
+      budget = b.data;
+      // Migrar el presupuesto antiguo guardado en este dispositivo
+      if (!budget) {
+        const viejo = JSON.parse(localStorage.getItem('gc_budget') || 'null');
+        if (viejo?.total) {
+          $('#budget-label').value = viejo.label || '';
+          $('#budget-total').value = fmtInput(viejo.total);
+          toast('Pulsa «Guardar presupuesto» para subir el que tenías en este móvil');
+        }
+      }
+      estado = 'ready';
+    } catch (e) {
+      estado = 'error';
+      ultimoError = errMsg(e);
+      toast('Error cargando datos: ' + ultimoError, 'error');
+    }
+    fillBudgetForm();
+    renderStats(); renderHistorial();
+  }
+
+  function fillBudgetForm() {
+    if (!budget) return;
+    $('#budget-label').value = budget.etiqueta || '';
+    $('#budget-total').value = fmtInput(budget.total);
+    $('#budget-desde').value = budget.desde || '';
+  }
+
+  // ── GUARDAR REPOSTAJE ─────────────────────────────────────────────
+  $('#form-repostaje').addEventListener('submit', async e => {
+    e.preventDefault();
+    const fechaEl = $('#input-fecha'), impEl = $('#input-importe');
+    const fecha = fechaEl.value;
+    const importe = parseImporte(impEl.value);
+    fechaEl.setAttribute('aria-invalid', !fecha);
+    impEl.setAttribute('aria-invalid', !(importe > 0));
+    if (!fecha) { toast('Selecciona una fecha', 'error'); return; }
+    if (!(importe > 0)) { toast('Introduce un importe válido', 'error'); impEl.focus(); return; }
+    if (fecha > hoy() && !confirm('La fecha es futura. ¿Guardar igualmente?')) return;
+
+    await busy($('#btn-guardar'), 'Guardando…', async () => {
+      const { data, error } = await sb.from('repostajes')
+        .insert({ fecha, importe, notas: null })
+        .select('id, fecha, importe, notas, created_at')
+        .single();
+      if (error) { toast('Error: ' + errMsg(error), 'error'); return; }
+      repostajes.push(data);
+      repostajes.sort((a, b) => b.fecha.localeCompare(a.fecha) || b.created_at.localeCompare(a.created_at));
+      impEl.value = '';
+      fechaEl.value = hoy();
+      impEl.blur();
       renderStats();
-    } catch (e) {
-      notify('Error cargando datos: ' + e.message, 'error');
-    }
-  }
+      toast('Repostaje guardado: ' + eur.format(data.importe));
+    });
+  });
 
-  // ── GUARDAR REPOSTAJE ──────────────────────────────────────────────
-  async function guardarRepostaje() {
-    if (!connected) { notify('Conecta Supabase primero', 'error'); return; }
+  // ── PRESUPUESTO ───────────────────────────────────────────────────
+  $('#form-budget').addEventListener('submit', async e => {
+    e.preventDefault();
+    const etiqueta = $('#budget-label').value.trim() || null;
+    const total = parseImporte($('#budget-total').value);
+    const desde = $('#budget-desde').value || null;
+    $('#budget-total').setAttribute('aria-invalid', !(total > 0));
+    if (!(total > 0)) { toast('Introduce un saldo válido', 'error'); return; }
 
-    const fecha = document.getElementById('input-fecha').value;
-    const importe = parseFloat(document.getElementById('input-importe').value);
+    await busy($('#btn-budget'), 'Guardando…', async () => {
+      const { data, error } = await sb.from('presupuesto')
+        .upsert({ user_id: user.id, etiqueta, total, desde, updated_at: new Date().toISOString() })
+        .select('etiqueta, total, desde')
+        .single();
+      if (error) { toast('Error: ' + errMsg(error), 'error'); return; }
+      budget = data;
+      localStorage.removeItem('gc_budget');
+      document.activeElement?.blur();
+      renderStats();
+      toast('Presupuesto guardado');
+    });
+  });
 
-    if (!fecha) { notify('Selecciona una fecha', 'error'); return; }
-    if (!importe || importe <= 0) { notify('Introduce un importe válido', 'error'); return; }
-
-    const btn = document.getElementById('btn-guardar');
+  // ── BORRAR ────────────────────────────────────────────────────────
+  async function borrar(id, btn) {
+    const r = repostajes.find(x => x.id === id);
+    if (!r) return;
+    if (!confirm(`¿Eliminar el repostaje de ${eur.format(r.importe)} del ${fFecha.format(aFecha(r.fecha))}?`)) return;
     btn.disabled = true;
-    btn.textContent = 'Guardando…';
-
-    try {
-      const res = await sbFetch('POST', '/rest/v1/repostajes', { fecha, importe, notas: null });
-      if (!res.ok) throw new Error(await res.text());
-
-      document.getElementById('input-importe').value = '';
-      document.getElementById('input-fecha').value = today();
-
-      await loadAll();
-      notify('Repostaje guardado ✓', 'success');
-    } catch (e) {
-      notify('Error: ' + e.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Guardar';
-    }
+    const { error } = await sb.from('repostajes').delete().eq('id', id);
+    if (error) { btn.disabled = false; toast('Error al eliminar: ' + errMsg(error), 'error'); return; }
+    repostajes = repostajes.filter(x => x.id !== id);
+    renderStats(); renderHistorial();
+    toast('Eliminado');
   }
 
-  // ── DELETE ─────────────────────────────────────────────────────────
-  async function deleteRepostaje(id) {
-    if (!confirm('¿Eliminar este repostaje?')) return;
-    try {
-      const res = await sbFetch('DELETE', `/rest/v1/repostajes?id=eq.${id}`);
-      if (!res.ok) throw new Error(await res.text());
-      await loadAll();
-      if (document.getElementById('panel-historial').classList.contains('active')) renderHistorial();
-      notify('Eliminado', 'success');
-    } catch (e) {
-      notify('Error al eliminar: ' + e.message, 'error');
-    }
+  // ── RENDER ────────────────────────────────────────────────────────
+  function gastadoPeriodo() {
+    const desde = budget?.desde;
+    return repostajes
+      .filter(r => !desde || r.fecha >= desde)
+      .reduce((s, r) => s + Number(r.importe), 0);
   }
 
-  // ── RENDER STATS ───────────────────────────────────────────────────
   function renderStats() {
-    const total = budget ? budget.total : 0;
-    const spent = allRepostajes.reduce((s, r) => s + parseFloat(r.importe), 0);
+    const ids = ['#stat-remaining', '#stat-spent', '#stat-total'];
+    if (estado === 'loading') { ids.forEach(i => { $(i).textContent = '0.000,00 €'; $(i).classList.add('sk'); }); return; }
+    ids.forEach(i => $(i).classList.remove('sk'));
+
+    const total = budget ? Number(budget.total) : 0;
+    const spent = gastadoPeriodo();
     const remaining = total - spent;
     const pct = total > 0 ? Math.min(100, (spent / total) * 100) : 0;
 
-    document.getElementById('stat-total').textContent = total > 0 ? fmt(total) : '—';
-    document.getElementById('stat-spent').textContent = fmt(spent);
+    $('#stat-total').textContent = total > 0 ? eur.format(total) : '—';
+    $('#stat-spent').textContent = eur.format(spent);
+    const rem = $('#stat-remaining');
+    rem.textContent = total > 0 ? eur.format(remaining) : 'Sin presupuesto';
+    rem.classList.toggle('neg', remaining < 0);
 
-    const remEl = document.getElementById('stat-remaining');
-    remEl.textContent = total > 0 ? fmt(remaining) : '—';
-    remEl.className = 'stat-value ' + (remaining < 0 ? 'danger' : 'accent');
-
-    const bar = document.getElementById('progress-bar');
+    const bar = $('#progress-bar');
     bar.style.width = pct + '%';
-    bar.className = 'progress-fill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warning' : '');
-
-    document.getElementById('progress-pct').textContent = total > 0 ? pct.toFixed(1) + '%' : '—';
-    document.getElementById('progress-label').textContent =
-      budget ? (budget.label || 'Uso del presupuesto') : 'Uso del presupuesto';
+    bar.className = 'fill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warning' : '');
+    $('#progress-pct').textContent = total > 0 ? pct.toLocaleString('es-ES', { maximumFractionDigits: 1 }) + ' %' : '—';
+    let label = budget?.etiqueta || 'Uso del presupuesto';
+    if (budget?.desde) label += ' · desde ' + fFecha.format(aFecha(budget.desde));
+    $('#progress-label').textContent = label;
   }
 
-  function fmt(n) {
-    return n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
-  }
-
-  // ── HISTORIAL ──────────────────────────────────────────────────────
-  async function loadHistorial() {
-    if (!connected) return;
-    try {
-      const res = await sbFetch('GET', '/rest/v1/repostajes?select=*&order=fecha.desc,created_at.desc');
-      allRepostajes = await res.json();
-    } catch(e) {}
-    renderHistorial();
-  }
+  const ICON_TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>';
 
   function renderHistorial() {
-    const tbody = document.getElementById('hist-tbody');
-    document.getElementById('hist-count').textContent =
-      allRepostajes.length ? `${allRepostajes.length} registros` : '';
-
-    if (!allRepostajes.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Sin repostajes aún</td></tr>';
+    const box = $('#hist');
+    const count = $('#hist-count');
+    if (estado === 'loading') {
+      count.textContent = '';
+      box.innerHTML = '<div class="rows">' + '<div class="sk sk-row"></div>'.repeat(5) + '</div>';
       return;
     }
-    tbody.innerHTML = allRepostajes.map(r => `
-      <tr>
-        <td>${formatDate(r.fecha)}</td>
-        <td class="amount-cell">${fmt(parseFloat(r.importe))}</td>
-        <td style="color:var(--muted)">${r.notas || '—'}</td>
-        <td><button class="btn-icon" onclick="deleteRepostaje('${r.id}')" aria-label="Borrar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-            <path d="M10 11v6"/>
-            <path d="M14 11v6"/>
-            <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
-          </svg>
-        </button></td>
-      </tr>
-    `).join('');
+    if (estado === 'error') {
+      count.textContent = '';
+      box.innerHTML = `<div class="card error-box">No se pudieron cargar los datos.<br>${esc(ultimoError)}<br><button class="btn btn-ghost" id="btn-retry" type="button">Reintentar</button></div>`;
+      $('#btn-retry').addEventListener('click', loadAll);
+      return;
+    }
+    count.textContent = repostajes.length ? `${repostajes.length} ${repostajes.length === 1 ? 'registro' : 'registros'}` : '';
+    if (!repostajes.length) {
+      box.innerHTML = '<div class="card empty">Aún no hay repostajes.<br>Registra el primero desde Inicio.</div>';
+      return;
+    }
+    box.innerHTML = '<div class="rows">' +
+      '<div class="row row-th"><span>Fecha</span><span>Importe</span><span>Notas</span><span></span></div>' +
+      repostajes.map(r => {
+        const d = aFecha(r.fecha);
+        const notas = r.notas ? esc(r.notas) : '';
+        return `<div class="row">
+          <div class="row-date">${fFecha.format(d)}<small>${fDia.format(d)}${notas ? ' · ' + notas : ''}</small></div>
+          <div class="row-amount">${eur.format(Number(r.importe))}</div>
+          <div class="row-notes">${notas || '—'}</div>
+          <button class="icon-btn" type="button" data-del="${esc(r.id)}" aria-label="Borrar repostaje del ${fFecha.format(d)}" ${navigator.onLine ? '' : 'disabled'}>${ICON_TRASH}</button>
+        </div>`;
+      }).join('') + '</div>';
+    box.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => borrar(b.dataset.del, b)));
   }
 
-  function formatDate(d) {
-    if (!d) return '—';
-    const [y, m, day] = d.split('-');
-    return `${day}/${m}/${y}`;
+  // ── INSTALACIÓN ───────────────────────────────────────────────────
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let installEvt = null;
+
+  addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    installEvt = e;
+    $('#card-install').hidden = false;
+    $('#btn-install').hidden = false;
+  });
+  $('#btn-install').addEventListener('click', async () => {
+    if (!installEvt) return;
+    installEvt.prompt();
+    const { outcome } = await installEvt.userChoice;
+    installEvt = null;
+    if (outcome === 'accepted') $('#card-install').hidden = true;
+  });
+  addEventListener('appinstalled', () => { $('#card-install').hidden = true; toast('App instalada'); });
+
+  if (isIOS && !standalone) {
+    $('#card-install').hidden = false;
+    $('#install-text').textContent = 'En Safari: Compartir → Añadir a pantalla de inicio.';
+    if (!localStorage.getItem('gc_ios_hint')) {
+      $('#ios-sheet').hidden = false;
+      const cerrar = () => { $('#ios-sheet').hidden = true; localStorage.setItem('gc_ios_hint', '1'); };
+      $('#ios-ok').addEventListener('click', cerrar);
+      $('#ios-sheet').addEventListener('click', e => { if (e.target.id === 'ios-sheet') cerrar(); });
+    }
   }
 
-  // ── NOTIFICATION ───────────────────────────────────────────────────
-  let notifTimer;
-  function notify(msg, type = 'success') {
-    const el = document.getElementById('notification');
-    el.textContent = msg;
-    el.className = 'show ' + type;
-    clearTimeout(notifTimer);
-    notifTimer = setTimeout(() => el.className = '', 3000);
+  // ── SERVICE WORKER ────────────────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
   }
 </script>
 </body>
